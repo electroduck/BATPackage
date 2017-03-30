@@ -6,11 +6,11 @@
 #include <Windows.h>
 #include "util.h"
 
-char* BF_FILENAME = "SCRIPT.BAT";
 char* SPACE = " ";
 char* ALTERNATE_FILE = "_loader.exe";
 
 int main(int argc, char** argv) {
+	char* bf_filename = "SCRIPT[0].BAT";
 	int bf_location = 40000;
 	FILE* output;
 	FILE* self;
@@ -20,6 +20,24 @@ int main(int argc, char** argv) {
 
 	//argv[0] = ALTERNATE_FILE; // has to be used when debugging due to issue with debugger
 
+	// Add a loop to detect if default bf_filename (SCRIPT[0].BAT) already exists.
+	// If true : loop until a SCRIPT[%d].BAT is available to write.
+	int index = 0;
+	char f_name[50];
+	snprintf(f_name, sizeof f_name, "SCRIPT[%d].BAT", index);
+		
+	while(1==1) {
+		if( access( f_name, F_OK ) != -1 ) {
+			index++;
+			snprintf(f_name, sizeof f_name, "SCRIPT[%d].BAT", index); // Try SCRIPT[1].BAT, SCRIPT[2].BAT, ..., SCRIPT[i].BAT, etc...
+		} else {
+			break;
+		}
+	}
+	
+	bf_filename = f_name;
+	// End
+	
 	memcpy(cmd_line, BF_FILENAME, strlen(BF_FILENAME));
 	while(i < argc) {
 		strappend(cmd_line, SPACE);
