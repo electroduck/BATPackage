@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
+#include <unistd.h>
 #include "util.h"
 
 char* SPACE = " ";
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
 	bf_filename = f_name;
 	// End
 	
-	memcpy(cmd_line, BF_FILENAME, strlen(BF_FILENAME));
+	memcpy(cmd_line, bf_filename, strlen(bf_filename));
 	while(i < argc) {
 		strappend(cmd_line, SPACE);
 		strappend(cmd_line, argv[i]);
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
 	}
 
 	self = fopen(argv[0], "r");
-	output = fopen(BF_FILENAME, "w");
+	output = fopen(bf_filename, "w");
 	fseek(self, bf_location, SEEK_SET);
 	while(1==1) {
 		c = fgetc(self);
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
 	system(cmd_line);
 
 	SetLastError(0);
-	if(!DeleteFile(BF_FILENAME)) {
+	if(!DeleteFile(bf_filename)) {
 		printf("Unable to clean up - Error code 0x%X\n", GetLastError());
 		return 1;
 	}
