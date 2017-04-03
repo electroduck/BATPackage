@@ -4,14 +4,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
-#include <unistd.h>
 #include "util.h"
 
 char* SPACE = " ";
 char* ALTERNATE_FILE = "_loader.exe";
 
 int main(int argc, char** argv) {
-	char* bf_filename = "SCRIPT[0].BAT";
+	char bf_filename[50] = "SCRIPT[0].BAT";
 	int bf_location = 40000;
 	FILE* output;
 	FILE* self;
@@ -23,23 +22,17 @@ int main(int argc, char** argv) {
 
 	// Add a loop to detect if default bf_filename (SCRIPT[0].BAT) already exists.
 	// If true : loop until a SCRIPT[%d].BAT is available to write.
-	int index = 0;
-	char f_name[50];
-	snprintf(f_name, sizeof f_name, "SCRIPT[%d].BAT", index);
-		
-	while(1==1) {
-		if( access( f_name, F_OK ) != -1 ) {
-			index++;
-			snprintf(f_name, sizeof f_name, "SCRIPT[%d].BAT", index); // Try SCRIPT[1].BAT, SCRIPT[2].BAT, ..., SCRIPT[i].BAT, etc...
-		} else {
-			break;
-		}
+	output = fopen(bf_filename, "r");
+	while(output!=NULL) {
+		snprintf(bf_filename, sizeof bf_filename, "SCRIPT[%d].BAT", i);
+		output = fopen(bf_filename, "r");
+		i++;
 	}
-	
-	bf_filename = f_name;
+	fclose(output);
 	// End
 	
 	memcpy(cmd_line, bf_filename, strlen(bf_filename));
+	i = 1;
 	while(i < argc) {
 		strappend(cmd_line, SPACE);
 		strappend(cmd_line, argv[i]);
