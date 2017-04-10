@@ -6,11 +6,11 @@
 #include <Windows.h>
 #include "util.h"
 
-char* BF_FILENAME = "SCRIPT.BAT";
 char* SPACE = " ";
 char* ALTERNATE_FILE = "_loader.exe";
 
 int main(int argc, char** argv) {
+	char bf_filename[50] = "SCRIPT[0].BAT";
 	int bf_location = 40000;
 	FILE* output;
 	FILE* self;
@@ -20,7 +20,19 @@ int main(int argc, char** argv) {
 
 	//argv[0] = ALTERNATE_FILE; // has to be used when debugging due to issue with debugger
 
-	memcpy(cmd_line, BF_FILENAME, strlen(BF_FILENAME));
+	// Add a loop to detect if default bf_filename (SCRIPT[0].BAT) already exists.
+	// If true : loop until a SCRIPT[%d].BAT is available to write.
+	output = fopen(bf_filename, "r");
+	while(output!=NULL) {
+		snprintf(bf_filename, sizeof bf_filename, "SCRIPT[%d].BAT", i);
+		output = fopen(bf_filename, "r");
+		i++;
+	}
+	fclose(output);
+	// End
+	
+	memcpy(cmd_line, bf_filename, strlen(bf_filename));
+	i = 1;
 	while(i < argc) {
 		strappend(cmd_line, SPACE);
 		strappend(cmd_line, argv[i]);
@@ -28,7 +40,7 @@ int main(int argc, char** argv) {
 	}
 
 	self = fopen(argv[0], "r");
-	output = fopen(BF_FILENAME, "w");
+	output = fopen(bf_filename, "w");
 	fseek(self, bf_location, SEEK_SET);
 	while(1==1) {
 		c = fgetc(self);
@@ -43,7 +55,7 @@ int main(int argc, char** argv) {
 	system(cmd_line);
 
 	SetLastError(0);
-	if(!DeleteFile(BF_FILENAME)) {
+	if(!DeleteFile(bf_filename)) {
 		printf("Unable to clean up - Error code 0x%X\n", GetLastError());
 		return 1;
 	}
